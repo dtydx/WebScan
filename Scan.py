@@ -2,7 +2,7 @@ import queue,simplejson,os,threading,subprocess,requests
 import warnings
 import nmap
 from socket import gethostbyname
-warnings.filterwarnings(action='ignore')#通过警告过滤器进行控制不发出警告消息
+warnings.filterwarnings(action='ignore')
 
 class ScanXN:
 	def __init__(self, keyword):
@@ -95,7 +95,7 @@ class ScanXN:
 			for port in ports:
 				if nm[ip]['tcp'][port]['state']=='open' and nm[ip]['tcp'][port]['name']=='http':
 					paths='http://'+ip+':'+str(port)
-					print('nmap:',paths)
+					##print('nmap:',paths)
 					self.opt2File(paths)
 					self.crawler(paths)
 		except:
@@ -103,7 +103,7 @@ class ScanXN:
 
 
 if __name__ == '__main__':
-	scan=ScanXN('test0917')	#	扫描之前修改任务名
+	scan=ScanXN('test0918')	#	扫描之前修改任务名
 	file = open("targets.txt")
 	t = threading.Thread(target=scan.request0)
 	t.start()
