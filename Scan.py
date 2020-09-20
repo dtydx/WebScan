@@ -1,3 +1,5 @@
+## D:\python\scan\xray\xray_windows_amd64.exe webscan --listen 127.0.0.1:7777 --html-output 0918.html
+
 import queue,simplejson,os,threading,subprocess,requests
 import warnings
 import nmap
@@ -15,16 +17,16 @@ class ScanXN:
 		self.urls_queue = queue.Queue()#使用多线程队列
 		self.tclose=0
 
-	def opt2File(self,paths):#爬虫的结果
+	def crawlFile(self,paths):#爬虫的结果
 		try:
-			f = open(self.crawl_result,'a')
+			f = open(self.crawl_result,'a+')
 			f.write(paths + '\n')
 		finally:
 			f.close()
 
-	def opt2File2(self,subdomains):
+	def domainFile(self,subdomains):
 		try:
-			f = open(self.sub_domains,'a')
+			f = open(self.sub_domains,'a+')
 			f.write(subdomains + '\n')
 		finally:
 			f.close()
@@ -46,10 +48,10 @@ class ScanXN:
 			try:
 				if(method0=='GET'):
 					a = requests.get(urls0, headers=headers0, proxies=proxies,timeout=30,verify=False)#http get
-					self.opt2File(urls0)
+					self.crawlFile(urls0)
 				elif(method0=='POST'):
 					a = requests.post(urls0, headers=headers0,data=data0, proxies=proxies,timeout=30,verify=False)#http post
-					self.opt2File(urls0)
+					self.crawlFile(urls0)
 			except:
 				continue
 		return
@@ -59,7 +61,7 @@ class ScanXN:
 		rsp = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 		output, error = rsp.communicate()
 		try:
-			#print(output.decode().split("--[Mission Complete]--")[1])
+			# print(output.decode().split("--[Mission Complete]--")[1])
 			result = simplejson.loads(output.decode().split("--[Mission Complete]--")[1])
 		except:
 			return
@@ -68,7 +70,7 @@ class ScanXN:
 		print(target)
 		print("[crawl ok]")
 		for subd in sub_domain:#获取子域名
-			self.opt2File2(subd)
+			self.domainFile(subd)
 		for req in req_list:
 			# print('req',req)
 			self.urls_queue.put(req)
@@ -76,6 +78,7 @@ class ScanXN:
 
 
 	def get_host_ip(self,sub_domain):#子域名解析ip
+		ip=[]
 		with open(sub_domain,'r') as f:
 			for line in f.readlines():
 				try:
@@ -83,8 +86,10 @@ class ScanXN:
 				except Exception as e:
 					pass
 				else:
-					with open(self.ip_txt, 'a+') as r:  # ip.txt里面存储的是批量解析后的结果
-						r.write(host + '\n')
+					if host not in ip:
+						ip.append(host)
+						with open(self.ip_txt, 'a+') as r:  # ip.txt里面存储的是批量解析后的结果
+							r.write(host + '\n')
 
 
 	def nmap_http(self,ip):
@@ -95,15 +100,15 @@ class ScanXN:
 			for port in ports:
 				if nm[ip]['tcp'][port]['state']=='open' and nm[ip]['tcp'][port]['name']=='http':
 					paths='http://'+ip+':'+str(port)
-					##print('nmap:',paths)
-					self.opt2File(paths)
+					print('nmap:',paths)
+					# self.crawlFile(paths)
 					self.crawler(paths)
 		except:
 			pass
 
 
 if __name__ == '__main__':
-	scan=ScanXN('test0918')	#	扫描之前修改任务名
+	scan=ScanXN('suda0920')	#	扫描之前修改任务名
 	file = open("targets.txt")
 	t = threading.Thread(target=scan.request0)
 	t.start()
@@ -116,6 +121,6 @@ if __name__ == '__main__':
 	for text in ipfile.readlines():
 		ip = text.strip('\n')
 		if ip!='':
-			print('ip:',ip)
+			#print('ip:',ip)
 			scan.nmap_http(ip)
 
