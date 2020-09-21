@@ -104,7 +104,7 @@ class ScanXN:
 				if nm[ip]['tcp'][port]['state']=='open' and nm[ip]['tcp'][port]['name']=='http':
 					paths='http://'+ip+':'+str(port)
 					##print('nmap:',paths)
-					# self.opt2File(paths)
+
 					self.crawler(paths)
 		except:
 			pass
