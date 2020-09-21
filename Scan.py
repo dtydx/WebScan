@@ -52,12 +52,14 @@ class ScanXN:
 				elif(method0=='POST'):
 					a = requests.post(urls0, headers=headers0,data=data0, proxies=proxies,timeout=30,verify=False)#http post
 					self.crawlFile(urls0)
+
 			except:
 				continue
 		return
 
 	def crawler(self,target):#使用爬虫获取子域名，并添加队列
-		cmd = ["./crawlergo", "-c", "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe","-t", "20","-f","smart","--fuzz-path", "--output-mode", "json", target]
+		cmd = ["./crawlergo", "-c", "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe","-t",
+			   "20","-f","smart","--fuzz-path", "--output-mode", "json", target]
 		rsp = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 		output, error = rsp.communicate()
 		try:
@@ -83,13 +85,14 @@ class ScanXN:
 			for line in f.readlines():
 				try:
 					host = gethostbyname(line.strip('\n'))  # 域名反解析得到的IP
-				except Exception as e:
+				except:
 					pass
 				else:
 					if host not in ip:
 						ip.append(host)
 						with open(self.ip_txt, 'a+') as r:  # ip.txt里面存储的是批量解析后的结果
 							r.write(host + '\n')
+		f.close()
 
 
 	def nmap_http(self,ip):
@@ -100,15 +103,15 @@ class ScanXN:
 			for port in ports:
 				if nm[ip]['tcp'][port]['state']=='open' and nm[ip]['tcp'][port]['name']=='http':
 					paths='http://'+ip+':'+str(port)
-					print('nmap:',paths)
-					# self.crawlFile(paths)
+					##print('nmap:',paths)
+					# self.opt2File(paths)
 					self.crawler(paths)
 		except:
 			pass
 
 
 if __name__ == '__main__':
-	scan=ScanXN('suda0920')	#	扫描之前修改任务名
+	scan=ScanXN('test1724')	#	扫描之前修改任务名
 	file = open("targets.txt")
 	t = threading.Thread(target=scan.request0)
 	t.start()
@@ -121,6 +124,7 @@ if __name__ == '__main__':
 	for text in ipfile.readlines():
 		ip = text.strip('\n')
 		if ip!='':
-			#print('ip:',ip)
+			print('ip:',ip)
 			scan.nmap_http(ip)
+	ipfile.close()
 
